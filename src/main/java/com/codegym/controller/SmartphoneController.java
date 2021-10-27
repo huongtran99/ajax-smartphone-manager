@@ -9,7 +9,6 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.ModelAndView;
 
 import java.util.Optional;
 
@@ -25,18 +24,20 @@ public class SmartphoneController {
     }
 
     @GetMapping
-    public ResponseEntity<Page<Smartphone>> allPhones(@RequestParam("q") Optional<String> search, @PageableDefault(size = 3) Pageable pageable) {
+    public ResponseEntity<Page<Smartphone>> allPhones(@RequestParam("q") Optional<String> search, @PageableDefault(size = 5) Pageable pageable) {
         if(search.isPresent()) {
             return new ResponseEntity<>(smartphoneService.findAllByProducer(search.get(), pageable), HttpStatus.OK);
         }
         return new ResponseEntity<>(smartphoneService.findAll(pageable), HttpStatus.OK);
     }
 
-    @GetMapping("/list")
-    public ModelAndView getAllSmartphonePage( @PageableDefault(size = 3) Pageable pageable) {
-        ModelAndView modelAndView = new ModelAndView("/phones/list");
-        modelAndView.addObject("smartphones", smartphoneService.findAll(pageable));
-        return modelAndView;
+    @GetMapping("/{id}")
+    public ResponseEntity<Smartphone> findOnePhone(@PathVariable Long id) {
+        Optional<Smartphone> smartphone = smartphoneService.findById(id);
+        if (smartphone.isPresent()) {
+            return new ResponseEntity<>(smartphone.get(), HttpStatus.OK);
+        }
+        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 
     @DeleteMapping("/{id}")
@@ -47,6 +48,16 @@ public class SmartphoneController {
         }
         smartphoneService.remove(id);
         return new ResponseEntity<>(smartphoneOptional.get(), HttpStatus.NO_CONTENT);
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<Smartphone> updateSmartphone(@PathVariable Long id, @RequestBody Smartphone smartphone) {
+        Optional<Smartphone> smartphone1 = smartphoneService.findById(id);
+        if (!smartphone1.isPresent()) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        smartphone.setId(id);
+        return new ResponseEntity<>(smartphoneService.save(smartphone), HttpStatus.OK);
     }
 
 }

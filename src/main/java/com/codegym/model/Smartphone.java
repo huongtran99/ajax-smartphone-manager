@@ -13,13 +13,15 @@ public class Smartphone {
     private String model;
     private double price;
 
-    public Smartphone() {
+    @ManyToOne
+    private Category category;
+
+    public Category getCategory() {
+        return category;
     }
 
-    public Smartphone(String producer, String model, double price) {
-        this.producer = producer;
-        this.model = model;
-        this.price = price;
+    public void setCategory(Category category) {
+        this.category = category;
     }
 
     public Long getId() {
